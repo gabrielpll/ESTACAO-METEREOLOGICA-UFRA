@@ -2,24 +2,47 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Estação Meteorológica - UFRA</title>
+    <title>Estação UFRA - Monitoramento</title>
+    <!-- Importando o Firebase (Versão Compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; background: #f4f4f4; padding: 50px; }
-        .painel { background: white; padding: 20px; border-radius: 10px; display: inline-block; box-shadow: 0 4px 8px rgba(0,0,0,0.1); }
-        h1 { color: #2c3e50; }
-        .valor { font-size: 2em; color: #27ae60; font-weight: bold; }
+        body { font-family: sans-serif; background: #f0f2f5; text-align: center; padding: 30px; }
+        .dashboard { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
+        .card { background: #fff; padding: 20px; border-radius: 12px; width: 180px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        .valor { font-size: 2.2em; font-weight: bold; color: #2c3e50; }
+        .unidade { font-size: 0.4em; color: #7f8c8d; }
     </style>
 </head>
 <body>
-    <div class="painel">
-        <h1>Monitoramento UFRA</h1>
-        <p>Temperatura Atual:</p>
-        <div class="valor">28.5°C</div>
-        <p>Umidade:</p>
-        <div class="valor">75%</div>
-        <hr>
-        <p>Status da Estação: <strong>Online</strong></p>
+    <h1>Estação Meteorológica - Tomé-Açu</h1>
+    <div class="dashboard">
+        <div class="card">
+            <h3>Temperatura</h3>
+            <div id="temp" class="valor">--<span class="unidade">°C</span></div>
+        </div>
+        <div class="card">
+            <h3>Umidade</h3>
+            <div id="umid" class="valor">--<span class="unidade">%</span></div>
+        </div>
     </div>
+
+    <script>
+        // Configuração com o link da sua imagem anterior
+        const firebaseConfig = {
+            databaseURL: "https://estacaometereologicaufra-default-rtdb.firebaseio.com/"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
+
+        // Lendo os dados do ESP32 em tempo real
+        db.ref('estacao').on('value', (snapshot) => {
+            const data = snapshot.val();
+            if(data) {
+                document.getElementById('temp').innerHTML = data.temperatura + '<span class="unidade">°C</span>';
+                document.getElementById('umid').innerHTML = data.umidade + '<span class="unidade">%</span>';
+            }
+        });
+    </script>
 </body>
 </html>
