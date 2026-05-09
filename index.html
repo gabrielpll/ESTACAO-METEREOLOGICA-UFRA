@@ -2,45 +2,69 @@
 <html lang="pt-br">
 <head>
     <meta charset="UTF-8">
-    <title>Estação UFRA - Monitoramento</title>
-    <!-- Importando o Firebase (Versão Compat) -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Estação Meteorológica Agriaçu - UFRA</title>
+    <!-- Firebase App e Database (Versão Compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.6.10/firebase-database-compat.js"></script>
+    
     <style>
-        body { font-family: sans-serif; background: #f0f2f5; text-align: center; padding: 30px; }
-        .dashboard { display: flex; justify-content: center; gap: 20px; margin-top: 20px; }
-        .card { background: #fff; padding: 20px; border-radius: 12px; width: 180px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        .valor { font-size: 2.2em; font-weight: bold; color: #2c3e50; }
-        .unidade { font-size: 0.4em; color: #7f8c8d; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #f4f7f6; color: #333; margin: 0; padding: 20px; }
+        h1 { color: #2c3e50; }
+        .dashboard { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 15px; max-width: 1000px; margin: 20px auto; }
+        .card { background: white; padding: 15px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); border-top: 5px solid #27ae60; }
+        .card h3 { font-size: 0.9em; margin-bottom: 10px; color: #7f8c8d; text-transform: uppercase; }
+        .valor { font-size: 1.8em; font-weight: bold; color: #2c3e50; }
+        .unidade { font-size: 0.5em; vertical-align: middle; margin-left: 5px; }
+        .footer { margin-top: 30px; font-size: 0.8em; color: #95a5a6; }
     </style>
 </head>
 <body>
-    <h1>Estação Meteorológica - Tomé-Açu</h1>
+
+    <h1>Monitoramento Agrícola - Tomé-Açu</h1>
+    <p>Projeto PVTA833-2024 | UFRA - Agriaçu</p>
+
     <div class="dashboard">
-        <div class="card">
-            <h3>Temperatura</h3>
-            <div id="temp" class="valor">--<span class="unidade">°C</span></div>
-        </div>
-        <div class="card">
-            <h3>Umidade</h3>
-            <div id="umid" class="valor">--<span class="unidade">%</span></div>
-        </div>
+        <div class="card"><h3>Temperatura</h3><div class="valor" id="temp">--<span class="unidade">°C</span></div></div>
+        <div class="card"><h3>Umidade</h3><div class="valor" id="umid">--<span class="unidade">%</span></div></div>
+        <div class="card"><h3>Pressão</h3><div class="valor" id="pres">--<span class="unidade">hPa</span></div></div>
+        <div class="card"><h3>Luminosidade</h3><div class="valor" id="lux">--<span class="unidade">Lux</span></div></div>
+        <div class="card"><h3>Vento</h3><div class="valor" id="vento">--<span class="unidade">km/h</span></div></div>
+        <div class="card"><h3>Chuva</h3><div class="valor" id="chuva">--<span class="unidade">mm</span></div></div>
+        <div class="card"><h3>Temp. Solo</h3><div class="valor" id="solo">--<span class="unidade">°C</span></div></div>
+        <div class="card"><h3>Ponto Orvalho</h3><div class="valor" id="orvalho">--<span class="unidade">°C</span></div></div>
     </div>
 
+    <div class="footer">Atualizado em tempo real via Firebase</div>
+
     <script>
-        // Configuração com o link da sua imagem anterior
+        // Configurações extraídas da sua image_ff9bbd.jpg
         const firebaseConfig = {
-            databaseURL: "https://estacaometereologicaufra-default-rtdb.firebaseio.com/"
+            apiKey: "AIzaSyD697Y_KP8GzOXmnoosnJaFGvuvBgQSvG8",
+            authDomain: "estacaometereologicaufra.firebaseapp.com",
+            databaseURL: "https://estacaometereologicaufra-default-rtdb.firebaseio.com/",
+            projectId: "estacaometereologicaufra",
+            storageBucket: "estacaometereologicaufra.appspot.com",
+            messagingSenderId: "412456197875",
+            appId: "1:412456197875:web:5450ff6be4fa01a4652186"
         };
+
+        // Inicializa o Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        // Lendo os dados do ESP32 em tempo real
+        // Escuta os dados da pasta /estacao
         db.ref('estacao').on('value', (snapshot) => {
             const data = snapshot.val();
             if(data) {
-                document.getElementById('temp').innerHTML = data.temperatura + '<span class="unidade">°C</span>';
-                document.getElementById('umid').innerHTML = data.umidade + '<span class="unidade">%</span>';
+                document.getElementById('temp').innerHTML = data.temperatura.toFixed(1) + '<span class="unidade">°C</span>';
+                document.getElementById('umid').innerHTML = data.umidade.toFixed(1) + '<span class="unidade">%</span>';
+                document.getElementById('pres').innerHTML = data.pressao.toFixed(0) + '<span class="unidade">hPa</span>';
+                document.getElementById('lux').innerHTML = data.lux.toFixed(0) + '<span class="unidade">Lx</span>';
+                document.getElementById('vento').innerHTML = data.vento.toFixed(1) + '<span class="unidade">km/h</span>';
+                document.getElementById('chuva').innerHTML = data.chuva.toFixed(2) + '<span class="unidade">mm</span>';
+                document.getElementById('solo').innerHTML = data.solo.toFixed(1) + '<span class="unidade">°C</span>';
+                document.getElementById('orvalho').innerHTML = data.orvalho.toFixed(1) + '<span class="unidade">°C</span>';
             }
         });
     </script>
